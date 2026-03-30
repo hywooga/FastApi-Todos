@@ -40,6 +40,26 @@
         .header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
         .header .stats { margin-top: 8px; opacity: 0.9; font-size: 0.9rem; }
 
+        .progress-wrap {
+            margin: 12px auto 0;
+            max-width: 340px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 999px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: white;
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+        .progress-label {
+            margin-top: 5px;
+            font-size: 0.78rem;
+            opacity: 0.85;
+        }
+
         .container { max-width: 820px; margin: 0 auto; padding: 24px 16px 48px; }
 
         /* ── Add Form ── */
@@ -204,6 +224,10 @@
 <div class="header">
     <h1>📝 TODO List</h1>
     <div class="stats" id="stats">불러오는 중...</div>
+    <div class="progress-wrap">
+        <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progress-label"></div>
 </div>
 
 <div class="container">
@@ -336,6 +360,10 @@ function renderTodos() {
     document.getElementById('stats').textContent =
         `전체 ${total}개 · 완료 ${done}개 · 미완료 ${total - done}개` +
         (overdue ? ` · ⚠️ 기한초과 ${overdue}개` : '');
+
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = total > 0 ? `완료율 ${pct}%` : '';
 }
 
 function renderCard(todo) {
