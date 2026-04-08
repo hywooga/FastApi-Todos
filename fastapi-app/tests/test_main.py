@@ -151,6 +151,24 @@ class TestStateManagement:
 # 3. API CRUD 테스트
 # ══════════════════════════════════════════════════════════════
 
+# ── GET / (HTML 페이지) ──────────────────────────────────────
+class TestHomePage:
+    def test_home_returns_200(self):
+        """GET / 는 HTML 페이지를 200으로 반환"""
+        response = client.get("/")
+        assert response.status_code == 200
+
+    def test_home_returns_html(self):
+        """응답 Content-Type이 HTML"""
+        response = client.get("/")
+        assert "text/html" in response.headers["content-type"]
+
+    def test_home_contains_todo_title(self):
+        """페이지에 TODO List 제목 포함"""
+        response = client.get("/")
+        assert "TODO" in response.text
+
+
 # ── GET /todos ───────────────────────────────────────────────
 class TestGetTodos:
     def test_get_empty_list(self):
