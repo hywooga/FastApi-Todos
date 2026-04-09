@@ -1,3 +1,4 @@
+import re
 import pytest
 import requests
 from playwright.sync_api import Page, expect
@@ -7,9 +8,17 @@ BASE_URL = "http://localhost:1548"
 # ── 테스트용 todo 사전/사후 정리 ─────────────────────────────
 @pytest.fixture(autouse=True)
 def cleanup_test_todo():
-    requests.delete(f"{BASE_URL}/todos/8888")
+    """테스트 전후 모든 todos 초기화"""
+    def clear_all():
+        try:
+            todos = requests.get(f"{BASE_URL}/todos").json()
+            for t in todos:
+                requests.delete(f"{BASE_URL}/todos/{t['id']}")
+        except Exception:
+            pass
+    clear_all()
     yield
-    requests.delete(f"{BASE_URL}/todos/8888")
+    clear_all()
 
 def make_todo(id=8888, title="테스트 할 일", completed=False, priority="medium", category=None):
     """API로 테스트용 todo 생성"""
@@ -122,9 +131,9 @@ def test_add_todo_missing_title(page: Page):
 def test_toggle_complete(page: Page):
     make_todo(title="완료 토글 테스트")
     goto(page)
-    page.wait_for_selector(".todo-checkbox", timeout=10000)
-    page.locator(".todo-checkbox").first.click()
-    expect(page.locator(".todo-card").first).to_have_class("completed", timeout=10000)
+    page.wait_for_selector("#card-8888 .todo-checkbox", timeout=10000)
+    page.locator("#card-8888 .todo-checkbox").click()
+    expect(page.locator("#card-8888")).to_have_class(re.compile("completed"), timeout=10000)
 
 def test_toggle_complete_shows_badge(page: Page):
     make_todo(title="완료 배지 확인")
@@ -148,18 +157,18 @@ def test_progress_bar_updates(page: Page):
 def test_delete_todo(page: Page):
     make_todo(title="삭제 테스트")
     goto(page)
-    page.wait_for_selector(".btn-danger", timeout=10000)
+    page.wait_for_selector("#card-8888 .btn-danger", timeout=10000)
     page.on("dialog", lambda d: d.accept())
-    page.locator(".btn-danger").first.click()
-    expect(page.locator(".todo-title")).not_to_contain_text("삭제 테스트", timeout=10000)
+    page.locator("#card-8888 .btn-danger").click()
+    expect(page.locator("#card-8888")).not_to_be_visible(timeout=10000)
 
 def test_delete_cancel(page: Page):
     make_todo(title="삭제 취소 테스트")
     goto(page)
-    page.wait_for_selector(".btn-danger", timeout=10000)
+    page.wait_for_selector("#card-8888 .btn-danger", timeout=10000)
     page.on("dialog", lambda d: d.dismiss())
-    page.locator(".btn-danger").first.click()
-    expect(page.locator(".todo-title").first).to_contain_text("삭제 취소 테스트", timeout=10000)
+    page.locator("#card-8888 .btn-danger").click()
+    expect(page.locator("#card-8888")).to_be_visible(timeout=10000)
 
 
 # ══════════════════════════════════════════════════════════════
