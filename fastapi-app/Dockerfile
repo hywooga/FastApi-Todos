@@ -7,11 +7,9 @@ WORKDIR /app
 # 필요한 파일 복사
 COPY . .
 
-# 의존성 설치
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 보안: 비root 사용자 생성 및 전환
-RUN useradd -m appuser
+# 의존성 설치 및 보안: 비root 사용자 생성
+RUN pip install --no-cache-dir -r requirements.txt && \
+    useradd -m appuser
 USER appuser
 
 # FastAPI 서버 실행
