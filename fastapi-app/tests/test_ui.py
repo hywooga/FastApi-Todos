@@ -2,7 +2,7 @@ import pytest
 import requests
 from playwright.sync_api import Page, expect
 
-BASE_URL = "http://163.239.77.77:1548"
+BASE_URL = "http://localhost:1548"
 
 # ── 테스트 전 서버 상태 초기화 ──────────────────────────────
 @pytest.fixture(autouse=True)
