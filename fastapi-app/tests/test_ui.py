@@ -64,31 +64,47 @@ def test_filter_buttons_visible(page: Page):
 def test_add_todo(page: Page):
     goto(page)
     page.fill("#title", "UI테스트 할 일")
-    with page.expect_response(f"{BASE_URL}/todos"):
+    with page.expect_response(
+        lambda r: "/todos" in r.url and r.request.method == "POST"
+    ) as resp_info:
         page.click("button[type='submit']")
+    assert resp_info.value.status == 200, f"POST /todos 실패: {resp_info.value.status}"
+    page.wait_for_timeout(500)
     expect(page.locator(".todo-title").first).to_contain_text("UI테스트 할 일", timeout=10000)
 
 def test_add_todo_with_priority(page: Page):
     goto(page)
     page.fill("#title", "긴급 할 일")
     page.select_option("#priority", "high")
-    with page.expect_response(f"{BASE_URL}/todos"):
+    with page.expect_response(
+        lambda r: "/todos" in r.url and r.request.method == "POST"
+    ) as resp_info:
         page.click("button[type='submit']")
+    assert resp_info.value.status == 200, f"POST /todos 실패: {resp_info.value.status}"
+    page.wait_for_timeout(500)
     expect(page.locator(".priority-high").first).to_be_visible(timeout=10000)
 
 def test_add_todo_with_category(page: Page):
     goto(page)
     page.fill("#title", "카테고리 테스트")
     page.fill("#category", "업무")
-    with page.expect_response(f"{BASE_URL}/todos"):
+    with page.expect_response(
+        lambda r: "/todos" in r.url and r.request.method == "POST"
+    ) as resp_info:
         page.click("button[type='submit']")
+    assert resp_info.value.status == 200, f"POST /todos 실패: {resp_info.value.status}"
+    page.wait_for_timeout(500)
     expect(page.locator(".badge-category").first).to_contain_text("업무", timeout=10000)
 
 def test_form_clears_after_submit(page: Page):
     goto(page)
     page.fill("#title", "초기화 확인")
-    with page.expect_response(f"{BASE_URL}/todos"):
+    with page.expect_response(
+        lambda r: "/todos" in r.url and r.request.method == "POST"
+    ) as resp_info:
         page.click("button[type='submit']")
+    assert resp_info.value.status == 200, f"POST /todos 실패: {resp_info.value.status}"
+    page.wait_for_timeout(500)
     expect(page.locator("#title")).to_have_value("", timeout=10000)
 
 def test_add_todo_missing_title(page: Page):
