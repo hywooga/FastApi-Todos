@@ -324,6 +324,7 @@
                 <option value="priority_desc">우선순위순</option>
             </select>
         </div>
+        <button class="btn btn-danger btn-sm" id="clear-completed-btn" onclick="deleteCompleted()" style="display:none">🗑 완료 항목 삭제</button>
     </div>
 
     <!-- 할 일 목록 -->
@@ -397,6 +398,9 @@ function renderTodos() {
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
     document.getElementById('progress-bar').style.width = pct + '%';
     document.getElementById('progress-label').textContent = total > 0 ? `완료율 ${pct}%` : '';
+
+    // 완료 항목이 있을 때만 일괄삭제 버튼 표시
+    document.getElementById('clear-completed-btn').style.display = done > 0 ? '' : 'none';
 }
 
 function renderCard(todo) {
@@ -522,6 +526,13 @@ async function deleteTodo(id) {
     if (!confirm('이 항목을 삭제할까요?')) return;
     const res = await fetch(`/todos/${id}`, { method: 'DELETE' });
     if (res.ok) { todos = todos.filter(t => t.id !== id); renderTodos(); }
+}
+
+async function deleteCompleted() {
+    const count = todos.filter(t => t.completed).length;
+    if (!confirm(`완료된 항목 ${count}개를 모두 삭제할까요?`)) return;
+    const res = await fetch('/todos/completed', { method: 'DELETE' });
+    if (res.ok) { todos = todos.filter(t => !t.completed); renderTodos(); }
 }
 
 document.getElementById('todo-form').addEventListener('submit', async (e) => {
