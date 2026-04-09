@@ -47,7 +47,7 @@ def create_todo(todo: TodoItem):
     return todo
 
 # To-Do 항목 수정
-@app.put("/todos/{todo_id}", response_model=TodoItem)
+@app.put("/todos/{todo_id}", response_model=TodoItem, responses={404: {"description": "To-Do item not found"}})
 def update_todo(todo_id: int, updated_todo: TodoItem):
     todos = load_todos()
     for todo in todos:
