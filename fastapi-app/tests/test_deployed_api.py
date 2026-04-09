@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "http://163.239.77.77:1548"
+BASE_URL = "http://163.239.77.63:1548"
 
 def test_home_page():
     response = requests.get(f"{BASE_URL}/")
