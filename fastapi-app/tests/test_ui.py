@@ -28,7 +28,7 @@ def make_todo(id=8888, title="테스트 할 일", completed=False, priority="med
 
 def goto(page: Page):
     """페이지 이동 후 fetchTodos() 완료까지 대기"""
-    goto(page)
+    page.goto(BASE_URL)
     page.wait_for_load_state("networkidle")
 
 
