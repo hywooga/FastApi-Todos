@@ -153,6 +153,12 @@ class TestStateManagement:
 
 # ── GET / (HTML 페이지) ──────────────────────────────────────
 class TestHomePage:
+    @pytest.fixture(autouse=True)
+    def change_to_app_dir(self, monkeypatch):
+        """templates/index.html 경로를 찾을 수 있도록 fastapi-app/ 으로 이동"""
+        app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        monkeypatch.chdir(app_dir)
+
     def test_home_returns_200(self):
         """GET / 는 HTML 페이지를 200으로 반환"""
         response = client.get("/")
