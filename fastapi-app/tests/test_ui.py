@@ -13,7 +13,7 @@ def cleanup_test_todo():
 
 def make_todo(id=8888, title="테스트 할 일", completed=False, priority="medium", category=None):
     """API로 테스트용 todo 생성"""
-    requests.post(f"{BASE_URL}/todos", json={
+    res = requests.post(f"{BASE_URL}/todos", json={
         "id": id,
         "title": title,
         "description": "",
@@ -23,6 +23,13 @@ def make_todo(id=8888, title="테스트 할 일", completed=False, priority="med
         "category": category,
         "created_at": None
     })
+    assert res.status_code == 200, f"make_todo 실패: {res.status_code} {res.text}"
+
+
+def goto(page: Page):
+    """페이지 이동 후 fetchTodos() 완료까지 대기"""
+    goto(page)
+    page.wait_for_load_state("networkidle")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -30,23 +37,23 @@ def make_todo(id=8888, title="테스트 할 일", completed=False, priority="med
 # ══════════════════════════════════════════════════════════════
 
 def test_page_title(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     expect(page).to_have_title("TODO List")
 
 def test_header_visible(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     expect(page.locator(".header h1")).to_contain_text("TODO List")
 
 def test_add_form_visible(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     expect(page.locator("#todo-form")).to_be_visible()
 
 def test_progress_bar_visible(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     expect(page.locator(".progress-wrap")).to_be_visible()
 
 def test_filter_buttons_visible(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     expect(page.locator(".filter-btn")).to_have_count(4)
 
 
@@ -55,34 +62,37 @@ def test_filter_buttons_visible(page: Page):
 # ══════════════════════════════════════════════════════════════
 
 def test_add_todo(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     page.fill("#title", "UI테스트 할 일")
-    page.click("button[type='submit']")
+    with page.expect_response(f"{BASE_URL}/todos"):
+        page.click("button[type='submit']")
     expect(page.locator(".todo-title").first).to_contain_text("UI테스트 할 일", timeout=10000)
 
 def test_add_todo_with_priority(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     page.fill("#title", "긴급 할 일")
     page.select_option("#priority", "high")
-    page.click("button[type='submit']")
+    with page.expect_response(f"{BASE_URL}/todos"):
+        page.click("button[type='submit']")
     expect(page.locator(".priority-high").first).to_be_visible(timeout=10000)
 
 def test_add_todo_with_category(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     page.fill("#title", "카테고리 테스트")
     page.fill("#category", "업무")
-    page.click("button[type='submit']")
+    with page.expect_response(f"{BASE_URL}/todos"):
+        page.click("button[type='submit']")
     expect(page.locator(".badge-category").first).to_contain_text("업무", timeout=10000)
 
 def test_form_clears_after_submit(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     page.fill("#title", "초기화 확인")
-    page.click("button[type='submit']")
-    page.wait_for_selector(".todo-card", timeout=10000)
-    expect(page.locator("#title")).to_have_value("")
+    with page.expect_response(f"{BASE_URL}/todos"):
+        page.click("button[type='submit']")
+    expect(page.locator("#title")).to_have_value("", timeout=10000)
 
 def test_add_todo_missing_title(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     initial_count = page.locator(".todo-card").count()
     page.click("button[type='submit']")
     page.wait_for_timeout(1000)
@@ -95,21 +105,21 @@ def test_add_todo_missing_title(page: Page):
 
 def test_toggle_complete(page: Page):
     make_todo(title="완료 토글 테스트")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".todo-checkbox", timeout=10000)
     page.locator(".todo-checkbox").first.click()
     expect(page.locator(".todo-card").first).to_have_class("completed", timeout=10000)
 
 def test_toggle_complete_shows_badge(page: Page):
     make_todo(title="완료 배지 확인")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".todo-checkbox", timeout=10000)
     page.locator(".todo-checkbox").first.click()
     expect(page.locator(".badge-done").first).to_be_visible(timeout=10000)
 
 def test_progress_bar_updates(page: Page):
     make_todo(title="진행바 테스트")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".todo-checkbox", timeout=10000)
     page.locator(".todo-checkbox").first.click()
     expect(page.locator("#progress-label")).to_contain_text("%", timeout=10000)
@@ -121,7 +131,7 @@ def test_progress_bar_updates(page: Page):
 
 def test_delete_todo(page: Page):
     make_todo(title="삭제 테스트")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".btn-danger", timeout=10000)
     page.on("dialog", lambda d: d.accept())
     page.locator(".btn-danger").first.click()
@@ -129,7 +139,7 @@ def test_delete_todo(page: Page):
 
 def test_delete_cancel(page: Page):
     make_todo(title="삭제 취소 테스트")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".btn-danger", timeout=10000)
     page.on("dialog", lambda d: d.dismiss())
     page.locator(".btn-danger").first.click()
@@ -142,20 +152,20 @@ def test_delete_cancel(page: Page):
 
 def test_search_filters_results(page: Page):
     make_todo(title="검색용 항목")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".todo-card", timeout=10000)
     page.fill("#search", "검색용")
     page.wait_for_timeout(500)
     expect(page.locator(".todo-card")).to_have_count(1, timeout=5000)
 
 def test_search_no_results(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     page.fill("#search", "절대없는검색어zzz")
     expect(page.locator(".empty-state")).to_be_visible(timeout=5000)
 
 def test_search_clear_restores(page: Page):
     make_todo(title="복원 테스트")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".todo-card", timeout=10000)
     page.fill("#search", "복원")
     page.wait_for_timeout(300)
@@ -170,7 +180,7 @@ def test_search_clear_restores(page: Page):
 
 def test_filter_active(page: Page):
     make_todo(title="미완료 항목")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".filter-btn", timeout=10000)
     page.get_by_role("button", name="미완료").click()
     page.wait_for_timeout(500)
@@ -180,7 +190,7 @@ def test_filter_active(page: Page):
 
 def test_filter_completed(page: Page):
     make_todo(title="완료된 항목", completed=True)
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".filter-btn", timeout=10000)
     page.get_by_role("button", name="완료", exact=True).click()
     page.wait_for_timeout(500)
@@ -189,7 +199,7 @@ def test_filter_completed(page: Page):
     assert empty.is_visible() or cards.count() >= 1
 
 def test_filter_all_active_by_default(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     expect(page.locator(".filter-btn.active")).to_contain_text("전체")
 
 
@@ -199,14 +209,14 @@ def test_filter_all_active_by_default(page: Page):
 
 def test_edit_form_opens(page: Page):
     make_todo(title="수정 테스트")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".btn-secondary", timeout=10000)
     page.get_by_role("button", name="수정").first.click()
     expect(page.locator(".edit-form.open").first).to_be_visible(timeout=5000)
 
 def test_edit_cancel_closes_form(page: Page):
     make_todo(title="취소 테스트")
-    page.goto(BASE_URL)
+    goto(page)
     page.wait_for_selector(".btn-secondary", timeout=10000)
     page.get_by_role("button", name="수정").first.click()
     page.wait_for_selector(".edit-form.open", timeout=5000)
@@ -219,17 +229,17 @@ def test_edit_cancel_closes_form(page: Page):
 # ══════════════════════════════════════════════════════════════
 
 def test_dark_mode_toggle(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     page.click("#dark-toggle")
     expect(page.locator("body")).to_have_class("dark")
 
 def test_dark_mode_button_text_changes(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     page.click("#dark-toggle")
     expect(page.locator("#dark-toggle")).to_contain_text("라이트모드")
 
 def test_dark_mode_toggle_back(page: Page):
-    page.goto(BASE_URL)
+    goto(page)
     page.click("#dark-toggle")
     page.click("#dark-toggle")
     classes = page.locator("body").get_attribute("class") or ""
