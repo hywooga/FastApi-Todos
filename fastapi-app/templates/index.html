@@ -120,7 +120,8 @@
             pointer-events: none;
             z-index: 0;
         }
-        .header > *:not(.vinyl-deco):not(.tape-deco) { position: relative; z-index: 1; }
+        .header > *:not(.vinyl-deco):not(.tape-deco):not(.dark-toggle) { position: relative; z-index: 1; }
+        .header > .dark-toggle { z-index: 2; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .header-tagline {
             font-family: 'Noto Sans KR', sans-serif;
