@@ -58,6 +58,16 @@
             background-image:
                 radial-gradient(ellipse at top, rgba(255,0,60,0.12), transparent 70%);
         }
+        .header-tagline {
+            font-family: 'Bebas Neue', 'Noto Sans KR', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 6px;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            opacity: 0.85;
+        }
         .header h1 {
             font-family: 'Noto Sans KR', sans-serif;
             font-size: 3rem;
@@ -374,7 +384,8 @@
 
 <div class="header">
     <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()">🌙 다크모드</button>
-    <h1>이재는 바보</h1>
+    <div class="header-tagline">★ 이재는 바보 ★</div>
+    <h1>TODO List</h1>
     <div class="stats" id="stats">불러오는 중...</div>
     <div class="progress-wrap">
         <div class="progress-bar" id="progress-bar" style="width:0%"></div>
