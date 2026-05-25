@@ -125,27 +125,9 @@
         .header > *:not(.vinyl-deco):not(.tape-deco):not(.dark-toggle) { position: relative; z-index: 1; }
         .header > .dark-toggle { z-index: 2; }
 
-        /* ── 추가 데코: 네온 마이크 / 이퀄라이저 / 다이아 체인 ── */
-        .mic-deco {
-            position: fixed;
-            left: 22px;
-            top: 50%;
-            transform: translateY(-50%) rotate(-12deg);
-            width: 130px;
-            height: 280px;
-            opacity: 0.55;
-            pointer-events: none;
-            z-index: -1;
-            filter: drop-shadow(0 0 16px rgba(255,0,60,0.55));
-            animation: mic-float 6s ease-in-out infinite;
-        }
-        @keyframes mic-float {
-            0%, 100% { transform: translateY(-50%) rotate(-12deg); }
-            50%      { transform: translateY(-54%) rotate(-9deg); }
-        }
+        /* ── 추가 데코: 이퀄라이저(좌/우) / 다이아 체인(제목 우측) ── */
         .eq-deco {
             position: fixed;
-            right: 26px;
             top: 50%;
             transform: translateY(-50%);
             width: 110px;
@@ -155,6 +137,8 @@
             z-index: -1;
             filter: drop-shadow(0 0 12px rgba(120,0,255,0.5));
         }
+        .eq-deco.eq-right { right: 26px; }
+        .eq-deco.eq-left  { left: 22px; }
         .eq-deco rect { transform-origin: center bottom; animation: eq-bounce 1.1s ease-in-out infinite; }
         .eq-deco rect:nth-child(1) { animation-delay: 0.0s; }
         .eq-deco rect:nth-child(2) { animation-delay: 0.15s; }
@@ -165,29 +149,36 @@
             0%, 100% { transform: scaleY(0.3); }
             50%      { transform: scaleY(1); }
         }
+
+        /* 제목 + 다이아 체인을 가로로 정렬 */
+        .title-row {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            flex-wrap: wrap;
+        }
         .chain-deco {
-            position: fixed;
-            left: 50%;
-            bottom: 18px;
-            transform: translateX(-50%);
-            width: 160px;
-            height: 130px;
-            opacity: 0.7;
+            width: 140px;
+            height: 110px;
+            opacity: 0.9;
             pointer-events: none;
-            z-index: -1;
+            flex-shrink: 0;
             filter: drop-shadow(0 0 18px rgba(0,200,255,0.55)) drop-shadow(0 0 6px rgba(255,255,255,0.3));
             animation: chain-sway 4s ease-in-out infinite;
+            transform-origin: center top;
         }
         @keyframes chain-sway {
-            0%, 100% { transform: translateX(-50%) rotate(-3deg); }
-            50%      { transform: translateX(-50%) rotate(3deg); }
+            0%, 100% { transform: rotate(-4deg); }
+            50%      { transform: rotate(4deg); }
         }
-        /* 작은 화면에서는 사이드 데코 숨김 (가독성 보호) */
+        /* 작은 화면에서는 사이드 이퀄라이저 숨김 (가독성 보호) */
         @media (max-width: 1100px) {
-            .mic-deco, .eq-deco { display: none; }
+            .eq-deco { display: none; }
         }
         @media (max-width: 580px) {
-            .chain-deco { width: 110px; height: 90px; bottom: 8px; }
+            .chain-deco { width: 90px; height: 70px; }
+            .title-row { gap: 12px; }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .header-tagline {
@@ -538,46 +529,24 @@
 </head>
 <body>
 
-<!-- ── 사이드 데코: 네온 마이크 (좌측 고정) ── -->
-<svg class="mic-deco" viewBox="0 0 130 280" aria-hidden="true">
+<!-- ── 사이드 데코: 이퀄라이저 (좌측 고정, 애니메이션) ── -->
+<svg class="eq-deco eq-left" viewBox="0 0 110 180" aria-hidden="true">
     <defs>
-        <linearGradient id="micHead" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%"   stop-color="#ff4d6d"/>
-            <stop offset="100%" stop-color="#cc0030"/>
-        </linearGradient>
-        <linearGradient id="micBody" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%"   stop-color="#3a3a3a"/>
-            <stop offset="100%" stop-color="#0a0a0a"/>
+        <linearGradient id="eqGradLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stop-color="#ff003c"/>
+            <stop offset="50%"  stop-color="#a020ff"/>
+            <stop offset="100%" stop-color="#00c8ff"/>
         </linearGradient>
     </defs>
-    <!-- 마이크 헤드 (그릴) -->
-    <ellipse cx="65" cy="55" rx="40" ry="48" fill="url(#micHead)" stroke="#fff" stroke-width="1.5"/>
-    <g stroke="#1a0008" stroke-width="0.7" opacity="0.6" fill="none">
-        <line x1="30" y1="40" x2="100" y2="40"/>
-        <line x1="28" y1="55" x2="102" y2="55"/>
-        <line x1="30" y1="70" x2="100" y2="70"/>
-        <line x1="65" y1="10" x2="65" y2="100"/>
-        <line x1="50" y1="12" x2="50" y2="98"/>
-        <line x1="80" y1="12" x2="80" y2="98"/>
-    </g>
-    <ellipse cx="65" cy="55" rx="40" ry="48" fill="none" stroke="#fff" stroke-width="0.8" opacity="0.3"/>
-    <!-- 마이크 넥 -->
-    <rect x="55" y="100" width="20" height="18" fill="#2a2a2a" stroke="#ff003c" stroke-width="1"/>
-    <rect x="58" y="118" width="14" height="10" fill="#1a1a1a"/>
-    <!-- 마이크 본체 -->
-    <rect x="50" y="128" width="30" height="90" rx="4" fill="url(#micBody)" stroke="#ff003c" stroke-width="1.2"/>
-    <!-- 스위치/링 디테일 -->
-    <rect x="50" y="148" width="30" height="3" fill="#ff003c"/>
-    <rect x="50" y="175" width="30" height="2" fill="#5a5a5a"/>
-    <circle cx="65" cy="195" r="3" fill="#ff003c"/>
-    <!-- 케이블 -->
-    <path d="M 65 218 Q 50 240 70 255 Q 90 268 60 280" stroke="#ff003c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-    <!-- ON AIR 글로우 점 -->
-    <circle cx="65" cy="55" r="3" fill="#fff"/>
+    <rect x="5"   y="20" width="14" height="150" rx="3" fill="url(#eqGradLeft)"/>
+    <rect x="25"  y="20" width="14" height="150" rx="3" fill="url(#eqGradLeft)"/>
+    <rect x="45"  y="20" width="14" height="150" rx="3" fill="url(#eqGradLeft)"/>
+    <rect x="65"  y="20" width="14" height="150" rx="3" fill="url(#eqGradLeft)"/>
+    <rect x="85"  y="20" width="14" height="150" rx="3" fill="url(#eqGradLeft)"/>
 </svg>
 
 <!-- ── 사이드 데코: 이퀄라이저 (우측 고정, 애니메이션) ── -->
-<svg class="eq-deco" viewBox="0 0 110 180" aria-hidden="true">
+<svg class="eq-deco eq-right" viewBox="0 0 110 180" aria-hidden="true">
     <defs>
         <linearGradient id="eqGrad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%"   stop-color="#ff003c"/>
@@ -590,52 +559,6 @@
     <rect x="45"  y="20" width="14" height="150" rx="3" fill="url(#eqGrad)"/>
     <rect x="65"  y="20" width="14" height="150" rx="3" fill="url(#eqGrad)"/>
     <rect x="85"  y="20" width="14" height="150" rx="3" fill="url(#eqGrad)"/>
-</svg>
-
-<!-- ── 푸터 데코: 다이아 체인 (하단 중앙 고정) ── -->
-<svg class="chain-deco" viewBox="0 0 160 130" aria-hidden="true">
-    <defs>
-        <linearGradient id="diaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%"   stop-color="#ffffff"/>
-            <stop offset="50%"  stop-color="#9be8ff"/>
-            <stop offset="100%" stop-color="#00c8ff"/>
-        </linearGradient>
-        <linearGradient id="chainGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"   stop-color="#d4d4d4"/>
-            <stop offset="50%"  stop-color="#ffffff"/>
-            <stop offset="100%" stop-color="#a8a8a8"/>
-        </linearGradient>
-    </defs>
-    <!-- 체인 (좌우 곡선) -->
-    <path d="M 10 15 Q 80 55 150 15" stroke="url(#chainGrad)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-    <g fill="#e0e0e0" stroke="#888" stroke-width="0.5">
-        <ellipse cx="22"  cy="22" rx="5" ry="3.5" transform="rotate(-25 22 22)"/>
-        <ellipse cx="40"  cy="32" rx="5" ry="3.5" transform="rotate(-15 40 32)"/>
-        <ellipse cx="60"  cy="40" rx="5" ry="3.5" transform="rotate(-5 60 40)"/>
-        <ellipse cx="80"  cy="42" rx="5" ry="3.5"/>
-        <ellipse cx="100" cy="40" rx="5" ry="3.5" transform="rotate(5 100 40)"/>
-        <ellipse cx="120" cy="32" rx="5" ry="3.5" transform="rotate(15 120 32)"/>
-        <ellipse cx="138" cy="22" rx="5" ry="3.5" transform="rotate(25 138 22)"/>
-    </g>
-    <!-- 다이아몬드 펜던트 -->
-    <g transform="translate(80 55)">
-        <!-- 다이아 외곽 -->
-        <polygon points="0,0 -22,18 -14,55 14,55 22,18" fill="url(#diaGrad)" stroke="#fff" stroke-width="1.5"/>
-        <!-- 컷 라인 -->
-        <g stroke="#fff" stroke-width="0.8" fill="none" opacity="0.9">
-            <line x1="-22" y1="18" x2="22"  y2="18"/>
-            <line x1="-14" y1="55" x2="-22" y2="18"/>
-            <line x1="14"  y1="55" x2="22"  y2="18"/>
-            <line x1="0"   y1="0"  x2="-14" y2="55"/>
-            <line x1="0"   y1="0"  x2="14"  y2="55"/>
-            <line x1="0"   y1="0"  x2="0"   y2="55"/>
-            <line x1="-22" y1="18" x2="0"   y2="55"/>
-            <line x1="22"  y1="18" x2="0"   y2="55"/>
-        </g>
-        <!-- 하이라이트 (반짝) -->
-        <polygon points="-6,4 -16,18 -8,18" fill="#ffffff" opacity="0.85"/>
-        <polygon points="-12,20 -14,50 -4,22" fill="#ffffff" opacity="0.5"/>
-    </g>
 </svg>
 
 <div class="header">
@@ -708,7 +631,51 @@
     </svg>
 
     <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()">🌙 다크모드</button>
-    <h1>TODO List</h1>
+    <div class="title-row">
+        <h1>TODO List</h1>
+        <!-- 다이아 체인 (제목 우측 데코) -->
+        <svg class="chain-deco" viewBox="0 0 160 130" aria-hidden="true">
+            <defs>
+                <linearGradient id="diaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%"   stop-color="#ffffff"/>
+                    <stop offset="50%"  stop-color="#9be8ff"/>
+                    <stop offset="100%" stop-color="#00c8ff"/>
+                </linearGradient>
+                <linearGradient id="chainGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%"   stop-color="#d4d4d4"/>
+                    <stop offset="50%"  stop-color="#ffffff"/>
+                    <stop offset="100%" stop-color="#a8a8a8"/>
+                </linearGradient>
+            </defs>
+            <!-- 체인 (좌우 곡선) -->
+            <path d="M 10 15 Q 80 55 150 15" stroke="url(#chainGrad)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <g fill="#e0e0e0" stroke="#888" stroke-width="0.5">
+                <ellipse cx="22"  cy="22" rx="5" ry="3.5" transform="rotate(-25 22 22)"/>
+                <ellipse cx="40"  cy="32" rx="5" ry="3.5" transform="rotate(-15 40 32)"/>
+                <ellipse cx="60"  cy="40" rx="5" ry="3.5" transform="rotate(-5 60 40)"/>
+                <ellipse cx="80"  cy="42" rx="5" ry="3.5"/>
+                <ellipse cx="100" cy="40" rx="5" ry="3.5" transform="rotate(5 100 40)"/>
+                <ellipse cx="120" cy="32" rx="5" ry="3.5" transform="rotate(15 120 32)"/>
+                <ellipse cx="138" cy="22" rx="5" ry="3.5" transform="rotate(25 138 22)"/>
+            </g>
+            <!-- 다이아몬드 펜던트 -->
+            <g transform="translate(80 55)">
+                <polygon points="0,0 -22,18 -14,55 14,55 22,18" fill="url(#diaGrad)" stroke="#fff" stroke-width="1.5"/>
+                <g stroke="#fff" stroke-width="0.8" fill="none" opacity="0.9">
+                    <line x1="-22" y1="18" x2="22"  y2="18"/>
+                    <line x1="-14" y1="55" x2="-22" y2="18"/>
+                    <line x1="14"  y1="55" x2="22"  y2="18"/>
+                    <line x1="0"   y1="0"  x2="-14" y2="55"/>
+                    <line x1="0"   y1="0"  x2="14"  y2="55"/>
+                    <line x1="0"   y1="0"  x2="0"   y2="55"/>
+                    <line x1="-22" y1="18" x2="0"   y2="55"/>
+                    <line x1="22"  y1="18" x2="0"   y2="55"/>
+                </g>
+                <polygon points="-6,4 -16,18 -8,18" fill="#ffffff" opacity="0.85"/>
+                <polygon points="-12,20 -14,50 -4,22" fill="#ffffff" opacity="0.5"/>
+            </g>
+        </svg>
+    </div>
     <div class="stats" id="stats">불러오는 중...</div>
     <div class="progress-wrap">
         <div class="progress-bar" id="progress-bar" style="width:0%"></div>
